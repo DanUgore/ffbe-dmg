@@ -1,2 +1,2 @@
 # ffbe-dmg
-FFBE Damage Calculator
+Barebones FFBE Damage Calculator
