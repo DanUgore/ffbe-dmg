@@ -7,6 +7,10 @@
 	-->
 	<script>
 	$ = document.querySelector.bind(document); $$ = document.querySelectorAll.bind(document);
+	function loadCalc(data) {
+		//L100AB133FBWDBFBSIKEVC
+		
+	}
 	function calc() {
 		// Get Input
 		var level = +$("#level").value;
@@ -20,10 +24,14 @@
 		
 		// Perform Calc
 		var damage = 0, wep = wep1;
-		damage += Math.pow(Math.max(1, atk * (1+atkbuff/100) + atkflat + wep), 2);
+		var effatk = Math.floor(Math.max(1, atk * (1+atkbuff/100) + atkflat + wep));
+		damage += Math.pow(effatk, 2);
 		damage *= (100 + level); damage /= 100;
+		//console.log("ATK: "+Math.max(1, atk * (1+atkbuff/100) + atkflat + wep));
 		damage = Math.floor(damage);
-		damage /= Math.max(1, (def * (1+defbuff/100) + defflat) * (1-igndef/100));
+		var effdef = Math.max(1, Math.floor((def * (1+defbuff/100) + defflat) * (1-igndef/100)))
+		damage /= effdef;
+		//console.log("DEF: "+eff);
 		damage = Math.floor(damage);
 		damage *= skill; damage /= 100;
 		damage = Math.floor(damage);
@@ -39,6 +47,8 @@
 		var dmgmin = dmgrng[0][0], dmgmax = dmgrng[varmax-varmin][15];
 		
 		// Display Output
+		$("#eff-atk").innerText = effatk;
+		$("#eff-def").innerText = effdef;
 		$("#damage-range").innerText = dmgmin == dmgmax ? dmgmin : dmgmin+" ~ "+dmgmax;
 		//$("")
 	}
@@ -71,6 +81,8 @@
 				<button id="calc-button" type="button" onclick=calc()>Calculate!</button><input type="reset"></input>
 			</form></div>
 			<div id="output-div">
+			<!--Calc ID: <span id="calc-id">-</span>-->
+			Final ATK: <span id="eff-atk">--</span> Final DEF: <span id="eff-def">--</span><br>
 			Damage: <span id="damage-range"></span><br>
 			Variance: <span id="damage-values">TODO</span>
 			</div>
