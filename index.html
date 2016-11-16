@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<!-- 
+	((ATK^2 * (1+Level/100)) / DEF) * Skill * Killers * Element * Variance * RNG
+	Chain Mod applies to hits.
+	-->
+	<script>
+	$ = document.querySelector.bind(document); $$ = document.querySelectorAll.bind(document);
+	function calc() {
+		// Get Input
+		var level = +$("#level").value;
+		var atk = +$("#atk").value, atkflat = +$("#atk-flat").value, atkbuff = +$("#atk-buff").value;
+		var wep1 = +$("#wep1").value;
+		var def = +$("#def").value, defflat = +$("#def-flat").value, defbuff = +$("#def-buff").value;
+		var skill = +$("#skill-mod").value, igndef = +$("#ign-def").value;
+		var slayers = +$("#slayer").value, eleresist = +$("#ele-resist").value, chain = +$("#chain").value;
+		var varmin = +$("#var-min").value, varmax = +$("#var-max").value;
+		if (varmin > varmax) { varmin = $("#var-max").value; varmax = $("#var-min").value; }
+		
+		// Perform Calc
+		var damage = 0, wep = wep1;
+		damage += Math.pow(Math.max(1, atk * (1+atkbuff/100) + atkflat + wep), 2);
+		damage *= (100 + level); damage /= 100;
+		damage = Math.floor(damage);
+		damage /= Math.max(1, (def * (1+defbuff/100) + defflat) * (1-igndef/100));
+		damage = Math.floor(damage);
+		damage *= skill; damage /= 100;
+		damage = Math.floor(damage);
+		console.log(damage);
+		if (slayers) { damage *= 100+slayers; damage/= 100; }
+		if (eleresist) { damage *= 100-eleresist; damage /= 100; }
+		if (damage < 1 && eleresist !== 100) damage = 1;
+		damage = Math.floor(damage);
+		var dmgrng = [];
+		for (var i = varmin; i <= varmax; i++)
+			dmgrng.push([85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100]
+				.map(r => Math.floor(Math.max(1, Math.floor(r * Math.floor(damage*i/100) / 100)) * 1+chain/100)));
+		var dmgmin = dmgrng[0][0], dmgmax = dmgrng[varmax-varmin][15];
+		
+		// Display Output
+		$("#damage-range").innerText = dmgmin == dmgmax ? dmgmin : dmgmin+" ~ "+dmgmax;
+		//$("")
+	}
+	</script>
+	</head>
+	
+	<body>
+		<div id="container">
+			<div id="input-div"><form id="input">
+				Level <input type="number" id="level" value=100>
+				<!--Damage Type: 
+				Phys. <input type="radio" name="dmg-type" value="Phys" checked>
+				Mag. <input type="radio" name="dmg-type" value="Mag">--><br>
+				Base Atk <input type="number" id="atk" value=1 min=1>
+				Flat Atk <input type="number" id="atk-flat" value=0 min=0>
+				Atk (De)Buff% <input type="number" id="atk-buff" value=0><br>
+				Weapon Atk<input type="number" id="wep1" value=0 min=0>
+				<!--Weapon 2 <input type="number" id="wep2" value=0 min=0>--><br>
+				<!--Element<select id="element" size=1 multiple><option value="">None</option></select><br>-->
+				Target Def <input type="number" id="def" value=1 min=1>
+				Flat Def <input type="number" id="def-flat" value=0 min=0>
+				Def (De)Buff% <input type="number" id="def-buff" value=0><br>
+				Skill Mod% <input type="number" id="skill-mod" value=100 min=1>
+				Ignore Def% <input type="number" id="ign-def" value=0 min=0 max=100 step=5><br>
+				Slayer Mod% <input type="number" id="slayer" value=0 min=0 step=25><br>
+				Element Resist% <input type="number" id="ele-resist" value=0 step=5><br>
+				Variance Min% <input type="number" id="var-min" value=100 min=1 step=5>
+				Max% <input type="number" id="var-max" value=100 min=1 step=5><br>
+				Chain Mod Total% <input type="number" id="chain" value=0 min=0 step=10><br>
+				<button id="calc-button" type="button" onclick=calc()>Calculate!</button><input type="reset"></input>
+			</form></div>
+			<div id="output-div">
+			Damage: <span id="damage-range"></span><br>
+			Variance: <span id="damage-values">TODO</span>
+			</div>
+		</div>
+	</body>
+</html>
